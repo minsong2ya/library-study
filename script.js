@@ -53,3 +53,6 @@ function enterSite() {
 
 updateDDay();
 updateStudyingCount();
+window.enterSite = function () {
+  window.location.href = "study-room.html";
+};
