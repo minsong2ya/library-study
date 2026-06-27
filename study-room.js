@@ -210,8 +210,18 @@ async function submitGoal() {
     return;
   }
 
+sessionStorage.setItem("studyGoal", goal);
+
+  goalModal.style.display = "none";
+  const savedGoal = sessionStorage.getItem("studyGoal");
+
+if (savedGoal) {
   goalModal.style.display = "none";
   studyRoom.classList.remove("blurred");
+  await joinStudyRoom(savedGoal);
+} else {
+  studyRoom.classList.add("blurred");
+}
 
   
 
