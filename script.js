@@ -43,13 +43,8 @@ function updateDDay() {
 function updateStudyingCount() {
   const studyingText = document.getElementById("studyingText");
 
-  // 임시 랜덤 인원수
- onSnapshot(onlineCountRef, function (docSnap) {
-  const data = docSnap.data();
-  const count = data?.count ?? 0;
-
-  studyingText.textContent = `${count}명 공부 중`;
-});
+  studyingText.textContent = `0명 공부 중`;
+}
 }
 
 function enterSite() {
