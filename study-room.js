@@ -3,6 +3,7 @@ import {
   getDatabase,
   ref,
   set,
+  get,
   onDisconnect,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-database.js";
@@ -23,6 +24,7 @@ const database = getDatabase(app);
 const seatsLayer = document.getElementById("seatsLayer");
 
 let currentSeat;
+let currentSeatIndex = -1;
 let hasJoined = false;
 let userRef = null;
 
@@ -54,9 +56,30 @@ const seats = [
   { left: 83, top: 93 }
 ];
 
-function placeCharacterRandomly() {
-  const randomIndex = Math.floor(Math.random() * seats.length);
-  const seat = seats[randomIndex];
+async function placeCharacterRandomly() {
+  const onlineUsersRef = ref(database, "onlineUsers");
+  const snapshot = await get(onlineUsersRef);
+
+  const onlineUsers = snapshot.val() || {};
+
+  const usedSeats = Object.values(onlineUsers)
+    .map(user => user.seat)
+    .filter(seat => seat !== undefined);
+
+  const availableSeats = seats
+    .map((seat, index) => ({ seat, index }))
+    .filter(item => !usedSeats.includes(item.index));
+
+  if (availableSeats.length === 0) {
+    alert("빈 좌석이 없습니다.");
+    return;
+  }
+
+  const randomItem =
+    availableSeats[Math.floor(Math.random() * availableSeats.length)];
+
+  const seat = randomItem.seat;
+  currentSeatIndex = randomItem.index;
   currentSeat = seat;
 
   const character = document.createElement("img");
@@ -84,6 +107,7 @@ function placeCharacterRandomly() {
   const studyTimeBadge = document.createElement("div");
   studyTimeBadge.className = "study-time-badge";
   studyTimeBadge.textContent = "🔥0h";
+
   studyTimeBadge.style.left = `${seat.left - 3.8}%`;
   studyTimeBadge.style.top = `${seat.top - 7}%`;
 
@@ -97,9 +121,10 @@ async function joinStudyRoom(goal) {
   userRef = ref(database, `onlineUsers/${userId}`);
 
   await set(userRef, {
-    goal: goal,
-    joinedAt: serverTimestamp()
-  });
+  goal: goal,
+  seat: currentSeatIndex,
+  joinedAt: serverTimestamp()
+});
 
   onDisconnect(userRef).remove();
 
