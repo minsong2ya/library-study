@@ -160,4 +160,10 @@ function showGoalLabel(goal) {
   seatsLayer.appendChild(label);
 }
 
-window.addEventListener("beforeunload", leaveStudyRoom);
+window.addEventListener("pagehide", leaveStudyRoom);
+
+document.addEventListener("visibilitychange", function () {
+  if (document.visibilityState === "hidden") {
+    leaveStudyRoom();
+  }
+});
