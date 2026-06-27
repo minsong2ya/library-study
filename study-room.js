@@ -138,6 +138,13 @@ async function submitGoal() {
   studyRoom.classList.remove("blurred");
 
   showGoalLabel(goal);
+  if (!hasJoined) {
+  hasJoined = true;
+
+  await updateDoc(onlineCountRef, {
+    count: increment(1),
+  });
+}
 
   if (!hasJoined) {
     hasJoined = true;
