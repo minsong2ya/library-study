@@ -133,6 +133,8 @@ async function joinStudyRoom(goal) {
 
 placeCharacterRandomly();
 
+placeCharacterRandomly();
+
 const studyRoom = document.querySelector(".study-room");
 const goalModal = document.getElementById("goalModal");
 const goalInput = document.getElementById("goalInput");
