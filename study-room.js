@@ -131,7 +131,6 @@ async function joinStudyRoom(goal) {
   console.log("Realtime 접속 등록 성공");
 }
 
-placeCharacterRandomly();
 
 placeCharacterRandomly();
 
