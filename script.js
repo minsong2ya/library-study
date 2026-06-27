@@ -1,13 +1,14 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
 import {
-  getFirestore,
-  doc,
-  onSnapshot
-} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+  getDatabase,
+  ref,
+  onValue
+} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyA2z_oPZdwKT1w205xHs5dRVP8_AIzCC78",
   authDomain: "library-study-b9678.firebaseapp.com",
+  databaseURL: "https://library-study-b9678-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "library-study-b9678",
   storageBucket: "library-study-b9678.firebasestorage.app",
   messagingSenderId: "93674680499",
@@ -15,8 +16,7 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const onlineCountRef = doc(db, "studyStatus", "onlineCount");
+const database = getDatabase(app);
 
 const startDate = new Date("2026-09-01");
 
@@ -42,10 +42,11 @@ function updateDDay() {
 
 function updateStudyingCount() {
   const studyingText = document.getElementById("studyingText");
+  const onlineUsersRef = ref(database, "onlineUsers");
 
-  onSnapshot(onlineCountRef, function (docSnap) {
-    const data = docSnap.data();
-    const count = data?.count ?? 0;
+  onValue(onlineUsersRef, function (snapshot) {
+    const users = snapshot.val();
+    const count = users ? Object.keys(users).length : 0;
 
     studyingText.textContent = `${count}명 공부 중`;
   });

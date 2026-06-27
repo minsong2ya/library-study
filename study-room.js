@@ -1,14 +1,16 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
 import {
-  getFirestore,
-  doc,
-  increment,
-  updateDoc
-} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+  getDatabase,
+  ref,
+  set,
+  onDisconnect,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyA2z_oPZdwKT1w205xHs5dRVP8_AIzCC78",
   authDomain: "library-study-b9678.firebaseapp.com",
+  databaseURL: "https://library-study-b9678-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "library-study-b9678",
   storageBucket: "library-study-b9678.firebasestorage.app",
   messagingSenderId: "93674680499",
@@ -16,13 +18,19 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const onlineCountRef = doc(db, "studyStatus", "onlineCount");
+const database = getDatabase(app);
 
 const seatsLayer = document.getElementById("seatsLayer");
 
 let currentSeat;
 let hasJoined = false;
+let userRef = null;
+
+const userId =
+  sessionStorage.getItem("studyUserId") ||
+  crypto.randomUUID();
+
+sessionStorage.setItem("studyUserId", userId);
 
 const seats = [
   { left: 17, top: 13 }, { left: 28, top: 13 }, { left: 39, top: 13 },
@@ -82,33 +90,20 @@ function placeCharacterRandomly() {
   seatsLayer.appendChild(studyTimeBadge);
 }
 
-async function joinStudyRoom() {
+async function joinStudyRoom(goal) {
   if (hasJoined) return;
 
   hasJoined = true;
+  userRef = ref(database, `onlineUsers/${userId}`);
 
-  try {
-    await updateDoc(onlineCountRef, {
-      count: increment(1)
-    });
-
-    console.log("접속자 수 +1 성공");
-  } catch (error) {
-    hasJoined = false;
-    console.error("접속자 수 +1 실패:", error);
-  }
-}
-
-function leaveStudyRoom() {
-  if (!hasJoined) return;
-
-  hasJoined = false;
-
-  updateDoc(onlineCountRef, {
-    count: increment(-1)
-  }).catch((error) => {
-    console.error("접속자 수 -1 실패:", error);
+  await set(userRef, {
+    goal: goal,
+    joinedAt: serverTimestamp()
   });
+
+  onDisconnect(userRef).remove();
+
+  console.log("Realtime 접속 등록 성공");
 }
 
 placeCharacterRandomly();
@@ -146,7 +141,7 @@ async function submitGoal() {
 
   showGoalLabel(goal);
 
-  await joinStudyRoom();
+  await joinStudyRoom(goal);
 }
 
 function showGoalLabel(goal) {
@@ -159,11 +154,3 @@ function showGoalLabel(goal) {
 
   seatsLayer.appendChild(label);
 }
-
-window.addEventListener("pagehide", leaveStudyRoom);
-
-document.addEventListener("visibilitychange", function () {
-  if (document.visibilityState === "hidden") {
-    leaveStudyRoom();
-  }
-});
