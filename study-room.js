@@ -175,27 +175,28 @@ async function joinStudyRoom(goal) {
 }
 
 
-async function init() {
-  await placeCharacterRandomly();
-  watchOnlineUsers();
-}
-
-init();
-
 const studyRoom = document.querySelector(".study-room");
 const goalModal = document.getElementById("goalModal");
 const goalInput = document.getElementById("goalInput");
 const goalSubmitBtn = document.getElementById("goalSubmitBtn");
 
-const savedGoal = sessionStorage.getItem("studyGoal");
+async function init() {
+  await placeCharacterRandomly();
 
-if (savedGoal) {
-  goalModal.style.display = "none";
-  studyRoom.classList.remove("blurred");
-  await joinStudyRoom(savedGoal);
-} else {
-  studyRoom.classList.add("blurred");
+  const savedGoal = sessionStorage.getItem("studyGoal");
+
+  if (savedGoal) {
+    goalModal.style.display = "none";
+    studyRoom.classList.remove("blurred");
+    await joinStudyRoom(savedGoal);
+  } else {
+    studyRoom.classList.add("blurred");
+  }
+
+  watchOnlineUsers();
 }
+
+init();
 
 goalSubmitBtn.addEventListener("click", submitGoal);
 
