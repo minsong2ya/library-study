@@ -2,9 +2,8 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/fireba
 import {
   getFirestore,
   doc,
-  onSnapshot,
   increment,
-  updateDoc,
+  updateDoc
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -26,45 +25,25 @@ let currentSeat;
 let hasJoined = false;
 
 const seats = [
-  { left: 17, top: 13 },
-  { left: 28, top: 13 },
-  { left: 39, top: 13 },
-  { left: 50, top: 13 },
-  { left: 61, top: 13 },
-  { left: 72, top: 13 },
+  { left: 17, top: 13 }, { left: 28, top: 13 }, { left: 39, top: 13 },
+  { left: 50, top: 13 }, { left: 61, top: 13 }, { left: 72, top: 13 },
   { left: 83, top: 13 },
 
-  { left: 17, top: 33 },
-  { left: 28, top: 33 },
-  { left: 39, top: 33 },
-  { left: 50, top: 33 },
-  { left: 61, top: 33 },
-  { left: 72, top: 33 },
+  { left: 17, top: 33 }, { left: 28, top: 33 }, { left: 39, top: 33 },
+  { left: 50, top: 33 }, { left: 61, top: 33 }, { left: 72, top: 33 },
   { left: 83, top: 33 },
 
-  { left: 17, top: 53 },
-  { left: 28, top: 53 },
-  { left: 39, top: 53 },
-  { left: 50, top: 53 },
-  { left: 61, top: 53 },
-  { left: 72, top: 53 },
+  { left: 17, top: 53 }, { left: 28, top: 53 }, { left: 39, top: 53 },
+  { left: 50, top: 53 }, { left: 61, top: 53 }, { left: 72, top: 53 },
   { left: 83, top: 53 },
 
-  { left: 17, top: 71 },
-  { left: 28, top: 71 },
-  { left: 39, top: 71 },
-  { left: 50, top: 71 },
-  { left: 61, top: 71 },
-  { left: 72, top: 71 },
+  { left: 17, top: 71 }, { left: 28, top: 71 }, { left: 39, top: 71 },
+  { left: 50, top: 71 }, { left: 61, top: 71 }, { left: 72, top: 71 },
   { left: 83, top: 71 },
 
-  { left: 17, top: 93 },
-  { left: 28, top: 93 },
-  { left: 39, top: 93 },
-  { left: 50, top: 93 },
-  { left: 61, top: 93 },
-  { left: 72, top: 93 },
-  { left: 83, top: 93 },
+  { left: 17, top: 93 }, { left: 28, top: 93 }, { left: 39, top: 93 },
+  { left: 50, top: 93 }, { left: 61, top: 93 }, { left: 72, top: 93 },
+  { left: 83, top: 93 }
 ];
 
 function placeCharacterRandomly() {
@@ -77,15 +56,15 @@ function placeCharacterRandomly() {
   character.className = "character";
   character.alt = "공부 중인 캐릭터";
 
-  setTimeout(function () {
+  setTimeout(() => {
     character.src = "./images/character-fire.png";
   }, 30 * 60 * 1000);
 
-  setTimeout(function () {
+  setTimeout(() => {
     character.src = "./images/character-crown.png";
   }, 2 * 60 * 60 * 1000);
 
-  setTimeout(function () {
+  setTimeout(() => {
     character.src = "./images/character-armor.png";
   }, 3 * 60 * 60 * 1000);
 
@@ -96,12 +75,40 @@ function placeCharacterRandomly() {
 
   const studyTimeBadge = document.createElement("div");
   studyTimeBadge.className = "study-time-badge";
-  studyTimeBadge.textContent = `🔥0h`;
-
+  studyTimeBadge.textContent = "🔥0h";
   studyTimeBadge.style.left = `${seat.left - 3.8}%`;
   studyTimeBadge.style.top = `${seat.top - 7}%`;
 
   seatsLayer.appendChild(studyTimeBadge);
+}
+
+async function joinStudyRoom() {
+  if (hasJoined) return;
+
+  hasJoined = true;
+
+  try {
+    await updateDoc(onlineCountRef, {
+      count: increment(1)
+    });
+
+    console.log("접속자 수 +1 성공");
+  } catch (error) {
+    hasJoined = false;
+    console.error("접속자 수 +1 실패:", error);
+  }
+}
+
+function leaveStudyRoom() {
+  if (!hasJoined) return;
+
+  hasJoined = false;
+
+  updateDoc(onlineCountRef, {
+    count: increment(-1)
+  }).catch((error) => {
+    console.error("접속자 수 -1 실패:", error);
+  });
 }
 
 placeCharacterRandomly();
@@ -138,20 +145,8 @@ async function submitGoal() {
   studyRoom.classList.remove("blurred");
 
   showGoalLabel(goal);
-  if (!hasJoined) {
-  hasJoined = true;
 
-  await updateDoc(onlineCountRef, {
-    count: increment(1),
-  });
-}
-
-  if (!hasJoined) {
-    hasJoined = true;
-    await updateDoc(onlineCountRef, {
-      count: increment(1),
-    });
-  }
+  await joinStudyRoom();
 }
 
 function showGoalLabel(goal) {
@@ -165,10 +160,4 @@ function showGoalLabel(goal) {
   seatsLayer.appendChild(label);
 }
 
-window.addEventListener("beforeunload", function () {
-  if (hasJoined) {
-    updateDoc(onlineCountRef, {
-      count: increment(-1),
-    });
-  }
-});
+window.addEventListener("beforeunload", leaveStudyRoom);
