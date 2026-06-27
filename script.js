@@ -17,7 +17,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const onlineCountRef = doc(db, "studyStatus", "onlineCount");
-// 개강일 설정
+
 const startDate = new Date("2026-09-01");
 
 function updateDDay() {
@@ -43,8 +43,12 @@ function updateDDay() {
 function updateStudyingCount() {
   const studyingText = document.getElementById("studyingText");
 
-  studyingText.textContent = `0명 공부 중`;
-}
+  onSnapshot(onlineCountRef, function (docSnap) {
+    const data = docSnap.data();
+    const count = data?.count ?? 0;
+
+    studyingText.textContent = `${count}명 공부 중`;
+  });
 }
 
 function enterSite() {
@@ -53,6 +57,5 @@ function enterSite() {
 
 updateDDay();
 updateStudyingCount();
-window.enterSite = function () {
-  window.location.href = "study-room.html";
-};
+
+window.enterSite = enterSite;
