@@ -187,7 +187,15 @@ const goalModal = document.getElementById("goalModal");
 const goalInput = document.getElementById("goalInput");
 const goalSubmitBtn = document.getElementById("goalSubmitBtn");
 
-studyRoom.classList.add("blurred");
+const savedGoal = sessionStorage.getItem("studyGoal");
+
+if (savedGoal) {
+  goalModal.style.display = "none";
+  studyRoom.classList.remove("blurred");
+  await joinStudyRoom(savedGoal);
+} else {
+  studyRoom.classList.add("blurred");
+}
 
 goalSubmitBtn.addEventListener("click", submitGoal);
 
@@ -210,20 +218,10 @@ async function submitGoal() {
     return;
   }
 
-sessionStorage.setItem("studyGoal", goal);
+  sessionStorage.setItem("studyGoal", goal);
 
-  goalModal.style.display = "none";
-  const savedGoal = sessionStorage.getItem("studyGoal");
-
-if (savedGoal) {
   goalModal.style.display = "none";
   studyRoom.classList.remove("blurred");
-  await joinStudyRoom(savedGoal);
-} else {
-  studyRoom.classList.add("blurred");
-}
-
-  
 
   await joinStudyRoom(goal);
 }
