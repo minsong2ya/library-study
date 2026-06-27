@@ -213,7 +213,7 @@ async function submitGoal() {
   goalModal.style.display = "none";
   studyRoom.classList.remove("blurred");
 
-  showGoalLabel(goal);
+  
 
   await joinStudyRoom(goal);
 }
