@@ -1,24 +1,46 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+import {
+  getFirestore,
+  doc,
+  onSnapshot,
+  increment,
+  updateDoc,
+} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyA2z_oPZdwKT1w205xHs5dRVP8_AIzCC78",
+  authDomain: "library-study-b9678.firebaseapp.com",
+  projectId: "library-study-b9678",
+  storageBucket: "library-study-b9678.firebasestorage.app",
+  messagingSenderId: "93674680499",
+  appId: "1:93674680499:web:51865432e58e3f23c740c6"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const onlineCountRef = doc(db, "studyStatus", "onlineCount");
+
 const seatsLayer = document.getElementById("seatsLayer");
 
 let currentSeat;
+let hasJoined = false;
 
 const seats = [
-{ left: 17, top: 13 },
-{ left: 28, top: 13 },
-{ left: 39, top: 13 },
-{ left: 50, top: 13 },
-{ left: 61, top: 13 },
-{ left: 72, top: 13 },
-{ left: 83, top: 13 },
+  { left: 17, top: 13 },
+  { left: 28, top: 13 },
+  { left: 39, top: 13 },
+  { left: 50, top: 13 },
+  { left: 61, top: 13 },
+  { left: 72, top: 13 },
+  { left: 83, top: 13 },
 
- // 2열
-{ left: 17, top: 33 },
-{ left: 28, top: 33 },
-{ left: 39, top: 33 },
-{ left: 50, top: 33 },
-{ left: 61, top: 33 },
-{ left: 72, top: 33 },
-{ left: 83, top: 33 },
+  { left: 17, top: 33 },
+  { left: 28, top: 33 },
+  { left: 39, top: 33 },
+  { left: 50, top: 33 },
+  { left: 61, top: 33 },
+  { left: 72, top: 33 },
+  { left: 83, top: 33 },
 
   { left: 17, top: 53 },
   { left: 28, top: 53 },
@@ -36,14 +58,13 @@ const seats = [
   { left: 72, top: 71 },
   { left: 83, top: 71 },
 
- // 5열
-{ left: 17, top: 93 },
-{ left: 28, top: 93 },
-{ left: 39, top: 93 },
-{ left: 50, top: 93 },
-{ left: 61, top: 93 },
-{ left: 72, top: 93 },
-{ left: 83, top: 93 },
+  { left: 17, top: 93 },
+  { left: 28, top: 93 },
+  { left: 39, top: 93 },
+  { left: 50, top: 93 },
+  { left: 61, top: 93 },
+  { left: 72, top: 93 },
+  { left: 83, top: 93 },
 ];
 
 function placeCharacterRandomly() {
@@ -55,36 +76,36 @@ function placeCharacterRandomly() {
   character.src = "./images/character.png";
   character.className = "character";
   character.alt = "공부 중인 캐릭터";
-  setTimeout(function () {
-  character.src = "./images/character-fire.png";
-}, 30 * 60 * 1000);
-setTimeout(function () {
-    character.src = "./images/character-crown.png";
-}, 2 * 60 * 60 * 1000);
-setTimeout(function () {
-    character.src = "./images/character-armor.png";
-}, 3 * 60 * 60 * 1000);
 
-  character.style.left = `${seat.left+0.3}%`;
+  setTimeout(function () {
+    character.src = "./images/character-fire.png";
+  }, 30 * 60 * 1000);
+
+  setTimeout(function () {
+    character.src = "./images/character-crown.png";
+  }, 2 * 60 * 60 * 1000);
+
+  setTimeout(function () {
+    character.src = "./images/character-armor.png";
+  }, 3 * 60 * 60 * 1000);
+
+  character.style.left = `${seat.left + 0.3}%`;
   character.style.top = `${seat.top}%`;
 
   seatsLayer.appendChild(character);
+
   const studyTimeBadge = document.createElement("div");
-studyTimeBadge.className = "study-time-badge";
+  studyTimeBadge.className = "study-time-badge";
+  studyTimeBadge.textContent = `🔥0h`;
 
-const totalMinutes = Math.floor(Math.random() * 17) * 30;
-const hour = Math.floor(totalMinutes / 60);
-const minute = totalMinutes % 60;
+  studyTimeBadge.style.left = `${seat.left - 3.8}%`;
+  studyTimeBadge.style.top = `${seat.top - 7}%`;
 
-studyTimeBadge.textContent = minute === 0 ? `🔥${hour}h` : `🔥${hour}.5h`;
-
-studyTimeBadge.style.left = `${seat.left - 3.8}%`;
-studyTimeBadge.style.top = `${seat.top - 7}%`;
-
-seatsLayer.appendChild(studyTimeBadge);
+  seatsLayer.appendChild(studyTimeBadge);
 }
 
 placeCharacterRandomly();
+
 const studyRoom = document.querySelector(".study-room");
 const goalModal = document.getElementById("goalModal");
 const goalInput = document.getElementById("goalInput");
@@ -100,7 +121,7 @@ goalInput.addEventListener("keydown", function (e) {
   }
 });
 
-function submitGoal() {
+async function submitGoal() {
   const goal = goalInput.value.trim();
 
   if (goal.length === 0) {
@@ -117,6 +138,13 @@ function submitGoal() {
   studyRoom.classList.remove("blurred");
 
   showGoalLabel(goal);
+
+  if (!hasJoined) {
+    hasJoined = true;
+    await updateDoc(onlineCountRef, {
+      count: increment(1),
+    });
+  }
 }
 
 function showGoalLabel(goal) {
@@ -125,7 +153,15 @@ function showGoalLabel(goal) {
   label.textContent = goal;
 
   label.style.left = `${currentSeat.left + 0.3}%`;
-label.style.top = `${currentSeat.top + 5}%`;
+  label.style.top = `${currentSeat.top + 5}%`;
 
   seatsLayer.appendChild(label);
 }
+
+window.addEventListener("beforeunload", function () {
+  if (hasJoined) {
+    updateDoc(onlineCountRef, {
+      count: increment(-1),
+    });
+  }
+});
