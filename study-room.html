@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>도서관 내부</title>
+
+  <link rel="stylesheet" href="study-room.css" />
+</head>
+<body>
+  <main class="study-room">
+    <div id="seatsLayer"></div>
+  </main>
+
+  <div id="goalModal" class="goal-modal">
+    <div class="goal-box">
+      <h2>오늘의 목표</h2>
+      <p>10글자 이내로 작성해 주세요</p>
+
+      <input id="goalInput" type="text" maxlength="10" placeholder="예: 토익 2시간" />
+
+      <button id="goalSubmitBtn">시작하기</button>
+    </div>
+  </div>
+
+  <script src="study-room.js"></script>
+</body>
+</html>
