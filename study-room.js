@@ -7,7 +7,8 @@ import {
   onValue,
   remove,
   onDisconnect,
-  serverTimestamp
+  serverTimestamp,
+  runTransaction
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-database.js";
 
 const firebaseConfig = {
@@ -61,43 +62,62 @@ const seats = [
   { left: 83, top: 93 }
 ];
 
-async function placeCharacterRandomly() {
-  const onlineUsersRef = ref(database, "onlineUsers");
-  const snapshot = await get(onlineUsersRef);
+async function reserveSeat(seatIndex) {
+  const seatRef = ref(database, `seats/${seatIndex}`);
 
-  const onlineUsers = snapshot.val() || {};
+  const result = await runTransaction(seatRef, function (currentValue) {
+    if (currentValue === null) {
+      return userId;
+    }
 
-  const usedSeats = Object.values(onlineUsers)
-    .map((user) => user.seat)
-    .filter((seat) => seat !== undefined);
-
-  const availableSeats = seats
-    .map((seat, index) => ({ seat, index }))
-    .filter((item) => !usedSeats.includes(item.index));
-
-  if (availableSeats.length === 0) {
-    alert("빈 좌석이 없습니다.");
     return;
+  });
+
+  return result.committed;
+}
+async function releaseSeat() {
+  if (currentSeatIndex === -1) return;
+
+  const seatRef = ref(database, `seats/${currentSeatIndex}`);
+
+  await runTransaction(seatRef, function (currentValue) {
+    if (currentValue === userId) {
+      return null;
+    }
+
+    return currentValue;
+  });
+}
+async function placeCharacterRandomly() {
+  const savedSeatIndex = sessionStorage.getItem("studySeatIndex");
+
+  if (savedSeatIndex !== null) {
+    const savedIndex = Number(savedSeatIndex);
+    const success = await reserveSeat(savedIndex);
+
+    if (success) {
+      currentSeatIndex = savedIndex;
+      currentSeat = seats[savedIndex];
+      return;
+    }
   }
 
-  let selectedItem;
+  const shuffledSeats = seats
+    .map((seat, index) => ({ seat, index }))
+    .sort(() => Math.random() - 0.5);
 
-if (
-  savedSeatIndex !== null &&
-  availableSeats.some(item => item.index === Number(savedSeatIndex))
-) {
-  selectedItem = availableSeats.find(
-    item => item.index === Number(savedSeatIndex)
-  );
-} else {
-  selectedItem =
-    availableSeats[Math.floor(Math.random() * availableSeats.length)];
+  for (const item of shuffledSeats) {
+    const success = await reserveSeat(item.index);
 
-  sessionStorage.setItem("studySeatIndex", selectedItem.index);
-}
+    if (success) {
+      currentSeatIndex = item.index;
+      currentSeat = item.seat;
+      sessionStorage.setItem("studySeatIndex", item.index);
+      return;
+    }
+  }
 
-currentSeatIndex = selectedItem.index;
-currentSeat = selectedItem.seat;
+  alert("빈 좌석이 없습니다.");
 }
 function renderUser(userId, userData) {
   if (renderedUsers[userId]) return;
@@ -214,6 +234,9 @@ async function joinStudyRoom(goal) {
   sessionStorage.setItem("studySeatIndex", currentSeatIndex);
 
   onDisconnect(userRef).remove();
+
+  const seatRef = ref(database, `seats/${currentSeatIndex}`);
+onDisconnect(seatRef).remove();
 
   console.log("Realtime 접속 등록 성공");
 }
