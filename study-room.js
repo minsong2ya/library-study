@@ -126,7 +126,6 @@ function renderUser(userId, userData) {
 
   updateStudyTimes();
 }
-
 function removeUser(userId) {
   const userElements = renderedUsers[userId];
 
