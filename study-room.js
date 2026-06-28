@@ -27,6 +27,7 @@ const seatsLayer = document.getElementById("seatsLayer");
 
 let currentSeat;
 let currentSeatIndex = -1;
+let savedSeatIndex = sessionStorage.getItem("studySeatIndex");
 let hasJoined = false;
 let userRef = null;
 
@@ -79,11 +80,24 @@ async function placeCharacterRandomly() {
     return;
   }
 
-  const randomItem =
+  let selectedItem;
+
+if (
+  savedSeatIndex !== null &&
+  availableSeats.some(item => item.index === Number(savedSeatIndex))
+) {
+  selectedItem = availableSeats.find(
+    item => item.index === Number(savedSeatIndex)
+  );
+} else {
+  selectedItem =
     availableSeats[Math.floor(Math.random() * availableSeats.length)];
 
-  currentSeatIndex = randomItem.index;
-  currentSeat = randomItem.seat;
+  sessionStorage.setItem("studySeatIndex", selectedItem.index);
+}
+
+currentSeatIndex = selectedItem.index;
+currentSeat = selectedItem.seat;
 }
 function renderUser(userId, userData) {
   if (renderedUsers[userId]) return;
@@ -197,6 +211,7 @@ async function joinStudyRoom(goal) {
     seat: currentSeatIndex,
     joinedAt: Date.now()
   });
+  sessionStorage.setItem("studySeatIndex", currentSeatIndex);
 
   onDisconnect(userRef).remove();
 
