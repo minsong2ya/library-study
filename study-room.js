@@ -89,12 +89,7 @@ function renderUser(userId, userData) {
   if (renderedUsers[userId]) return;
 
   const seat = seats[userData.seat];
-
   if (!seat) return;
-
-  const wrapper = document.createElement("div");
-  wrapper.className = "user-wrapper";
-  wrapper.dataset.userId = userId;
 
   const character = document.createElement("img");
   character.src = "./images/character.png";
@@ -123,11 +118,14 @@ function renderUser(userId, userData) {
   seatsLayer.appendChild(goalLabel);
 
   renderedUsers[userId] = {
-  character,
-  studyTimeBadge,
-  goalLabel,
-  joinedAt: userData.joinedAt,
-};
+    character,
+    studyTimeBadge,
+    goalLabel,
+    joinedAt: userData.joinedAt,
+  };
+
+  updateStudyTimes();
+}
 }
 function removeUser(userId) {
   const userElements = renderedUsers[userId];
@@ -158,6 +156,8 @@ function updateStudyTimes() {
       minute >= 30 ? `🔥${hour}.5h` : `🔥${hour}h`;
   });
 }
+
+setInterval(updateStudyTimes, 1000);
 
 setInterval(updateStudyTimes, 1000);
 function watchOnlineUsers() {
