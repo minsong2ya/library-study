@@ -106,7 +106,7 @@ function renderUser(userId, userData) {
 
   const studyTimeBadge = document.createElement("div");
   studyTimeBadge.className = "study-time-badge";
-  studyTimeBadge.textContent = "🔥0h";
+  studyTimeBadge.textContent = "";
 
   studyTimeBadge.style.left = `${seat.left - 3.8}%`;
   studyTimeBadge.style.top = `${seat.top - 7}%`;
@@ -123,10 +123,11 @@ function renderUser(userId, userData) {
   seatsLayer.appendChild(goalLabel);
 
   renderedUsers[userId] = {
-    character,
-    studyTimeBadge,
-    goalLabel,
-  };
+  character,
+  studyTimeBadge,
+  goalLabel,
+  joinedAt: userData.joinedAt,
+};
 }
 function removeUser(userId) {
   const userElements = renderedUsers[userId];
@@ -139,6 +140,26 @@ function removeUser(userId) {
 
   delete renderedUsers[userId];
 }
+function updateStudyTimes() {
+  Object.values(renderedUsers).forEach((user) => {
+    if (!user.joinedAt) return;
+
+    const joined =
+      typeof user.joinedAt === "number"
+        ? user.joinedAt
+        : Date.now();
+
+    const elapsedMinutes = Math.floor((Date.now() - joined) / 60000);
+
+    const hour = Math.floor(elapsedMinutes / 60);
+    const minute = elapsedMinutes % 60;
+
+    user.studyTimeBadge.textContent =
+      minute >= 30 ? `🔥${hour}.5h` : `🔥${hour}h`;
+  });
+}
+
+setInterval(updateStudyTimes, 1000);
 function watchOnlineUsers() {
   const onlineUsersRef = ref(database, "onlineUsers");
 
@@ -166,7 +187,7 @@ async function joinStudyRoom(goal) {
   await set(userRef, {
     goal: goal,
     seat: currentSeatIndex,
-    joinedAt: serverTimestamp()
+    joinedAt: Date.now()
   });
 
   onDisconnect(userRef).remove();
