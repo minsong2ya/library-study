@@ -103,7 +103,7 @@ function renderUser(userId, userData) {
   studyTimeBadge.className = "study-time-badge";
   studyTimeBadge.textContent = "";
 
-  studyTimeBadge.style.left = `${seat.left - 3.8}%`;
+  studyTimeBadge.style.left = `${seat.left - 4.5}%`;
   studyTimeBadge.style.top = `${seat.top - 7}%`;
 
   const goalLabel = document.createElement("div");
@@ -146,7 +146,7 @@ function updateStudyTimes() {
         ? user.joinedAt
         : Date.now();
 
-    const elapsedMinutes = Math.floor((Date.now() - joined) / 10000) * 30;
+    const elapsedMinutes = Math.floor((Date.now() - joined) / 60000);
 
     const hour = Math.floor(elapsedMinutes / 60);
     const minute = elapsedMinutes % 60;
