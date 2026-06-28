@@ -30,7 +30,7 @@ body {
 
 .character {
   position: absolute;
-  width: 170px;
+  width: 155px;
 
   transform: translate(-50%, -72%);
   z-index: 10;

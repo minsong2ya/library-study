@@ -1,4 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+
 import {
   getDatabase,
   ref,
@@ -23,6 +24,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
+
 
 const seatsLayer = document.getElementById("seatsLayer");
 
