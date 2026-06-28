@@ -147,7 +147,7 @@ function updateStudyTimes() {
         ? user.joinedAt
         : Date.now();
 
-    const elapsedMinutes = Math.floor((Date.now() - joined) / 10000) * 30;
+    const elapsedMinutes = Math.floor((Date.now() - joined) / 60000);
 
     const hour = Math.floor(elapsedMinutes / 60);
     const minute = elapsedMinutes % 60;
