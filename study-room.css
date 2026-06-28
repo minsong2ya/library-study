@@ -141,6 +141,6 @@ body {
   .character,
   .study-time-badge,
   .goal-label {
-    transform: translateX(12px);
+    transform: translateX(8px);
   }
 }
