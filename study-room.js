@@ -153,6 +153,15 @@ function updateStudyTimes() {
 
     user.studyTimeBadge.textContent =
       minute >= 30 ? `🔥${hour}.5h` : `🔥${hour}h`;
+      if (elapsedMinutes >= 180) {
+  user.character.src = "./images/character-armor.png";
+} else if (elapsedMinutes >= 120) {
+  user.character.src = "./images/character-crown.png";
+} else if (elapsedMinutes >= 30) {
+  user.character.src = "./images/character-fire.png";
+} else {
+  user.character.src = "./images/character.png";
+}
   });
 }
 
