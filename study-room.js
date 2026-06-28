@@ -126,7 +126,7 @@ function renderUser(userId, userData) {
 
   updateStudyTimes();
 }
-}
+
 function removeUser(userId) {
   const userElements = renderedUsers[userId];
 
@@ -159,7 +159,7 @@ function updateStudyTimes() {
 
 setInterval(updateStudyTimes, 1000);
 
-setInterval(updateStudyTimes, 1000);
+
 function watchOnlineUsers() {
   const onlineUsersRef = ref(database, "onlineUsers");
 
